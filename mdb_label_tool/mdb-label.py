@@ -11,7 +11,7 @@ def main():
     args = parse_arg()
 
     if args.type == KEY_TYPE_XLSX:
-        xlsx_proceed(args.database)
+        xlsx_proceed(args.database, args.columns)
 
 def xlsx_proceed(database, columns=4):
     db = CMdbXlsx(database)
@@ -22,20 +22,21 @@ def xlsx_proceed(database, columns=4):
         table = []
         pdf_title = f"box_{box}"
         count = 0
-        for title in d_box[box]:
+        l_titles = d_box[box]
+        l_titles.sort()
+        for title in l_titles:
             if count == 0:
                 row = []
-
             if count < columns:
                 row.append(title)
                 count += 1
             else:
                 table.append(row)
                 count = 0
-        
+    
        # print(table)
         
-        create_pdf_table(f"{pdf_title}.pdf", table, f"Box {str(box)}")
+        create_pdf_table(f"{pdf_title}.pdf", table, f"Box {str(box)}", fontsize=8)
 
 def parse_arg() ->argparse.Namespace:
     parser = argparse.ArgumentParser(description='Create labels for each bos',
@@ -43,6 +44,7 @@ def parse_arg() ->argparse.Namespace:
     
     parser.add_argument('database', help="Path to database. The type is given by the type option")
     parser.add_argument('-t', '--type', default=KEY_TYPE_XLSX, choices=['xlsx-google'], help="type of database (%(default)s)")
+    parser.add_argument('-c', '--columns', default=4, type = int, help="count of columns for printed tables (%(default)s)")
     return parser.parse_args()
 
 if __name__ == "__main__":

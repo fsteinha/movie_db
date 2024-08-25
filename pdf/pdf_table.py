@@ -21,8 +21,8 @@ def create_pdf_table(filename, table_data, headline, fontsize = 6):
     table_width, table_height = table.wrap(0, 0)
     
     # Setze die Headline genau über die Tabelle
-    headline_y_position = 50 + table_height + 20  # 20 Einheiten Abstand zur Tabelle
-    pdf_canvas.setFont("Helvetica-Bold", 10)
+    headline_y_position = 50 + table_height + 5  # 20 Einheiten Abstand zur Tabelle
+    pdf_canvas.setFont("Helvetica-Bold", 12)
     pdf_canvas.drawString(50, headline_y_position, headline)
 
     table.setStyle(style)

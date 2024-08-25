@@ -1,4 +1,5 @@
 import pandas as pd
+import warnings
 
 class CMdbXlsx:
     KEY_TITLE = 'Title'
@@ -26,6 +27,8 @@ class CMdbXlsx:
     KEY_TRAILER = 'Trailer'
     KEY___ID = '__id'
 
+    KEY_BOX_UNSPECIFIED = 'unspecified'
+
     def __init__(self, database) -> None:
         '''Constructor'''
         self.database = database
@@ -45,8 +48,11 @@ class CMdbXlsx:
         db_box = {}
 
         for record in self.data:
-            if record[self.KEY_BOX] not in db_box.keys():
+            box = record[self.KEY_BOX]
+            if box == None:
+                warnings.warn(f"box for {record} is not specified")
+                box = self.KEY_BOX_UNSPECIFIED 
+            elif record[self.KEY_BOX] not in db_box.keys():
                 db_box[record[self.KEY_BOX]] = []
-            db_box[record[self.KEY_BOX]].append(record[self.KEY_TITLE])
-
+            db_box[record[self.KEY_BOX]].append(record[self.KEY_TITLE])            
         return db_box
