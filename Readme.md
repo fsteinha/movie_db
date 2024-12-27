@@ -19,7 +19,7 @@ Reads from excel file "Movies(1).xlsx" and prints it with 3 columns
 # Libs
 ## mdb/mdb_xlsx.py
 
-This includes as interface reading the xlsx datatbase and give back need information.
+This includes as interface reading the xlsx database and give back need information.
 
 ## pdf/pdf_table.py
 

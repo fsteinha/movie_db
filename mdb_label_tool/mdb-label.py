@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys
 import argparse
 
@@ -24,6 +26,7 @@ def xlsx_proceed(database, columns=4):
         count = 0
         l_titles = d_box[box]
         l_titles.sort()
+        #print (f"{box} {l_titles}")
         for title in l_titles:
             if count == 0:
                 row = []
@@ -33,8 +36,12 @@ def xlsx_proceed(database, columns=4):
             else:
                 table.append(row)
                 count = 0
-    
-       # print(table)
+        if count != 0:
+            table.append(row)
+        
+        print (box)
+        print(table)
+        print ()
         
         create_pdf_table(f"{pdf_title}.pdf", table, f"Box {str(box)}", fontsize=8)
 

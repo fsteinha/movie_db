@@ -41,7 +41,19 @@ class CMdbXlsx:
         df = pd.read_excel(self.database)
 
         # Change data frame in dictionary 
-        self.data = df.to_dict(orient='records')
+        self.data = df.to_dict(orient='index')
+        d_title = {}
+        for key in self.data:
+            title = self.data[key]["Title"]
+            if title not in d_title:
+                d_title[title] = [key]
+            else:
+                d_title[title].append(key)
+
+        d_title_sorted = {key: d_title[key] for key in sorted(d_title)}
+
+        self.data["Index"]=d_title_sorted        
+        return self.data
 
     def sort_box_oriented_titles(self):
         '''Return the data oriented by boxes and titles'''
@@ -56,3 +68,6 @@ class CMdbXlsx:
                 db_box[record[self.KEY_BOX]] = []
             db_box[record[self.KEY_BOX]].append(record[self.KEY_TITLE])            
         return db_box
+    
+    def sort_titles(self):
+        pass
