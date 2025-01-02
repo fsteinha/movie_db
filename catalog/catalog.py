@@ -3,6 +3,7 @@
 
 import sys
 import argparse
+import re
 
 sys.path.append('../')
 from mdb.mdb_xlsx import CMdbXlsx
@@ -12,9 +13,10 @@ import json
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Paragraph, PageBreak 
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, _baseFontName, _baseFontNameB, _baseFontNameI 
 from reportlab.lib import colors 
 from reportlab.lib.units import mm # Importiere mm
+#from reportlab.rl_config import canvas_basefontname as _baseFontName
 from PIL import Image as PilImage
 from io import BytesIO
 from datetime import datetime
@@ -43,13 +45,31 @@ def xlsx_proceed(database, path2images, columns=4):
     # make table data
     table_data = [["Title", "Box", "Foto", "Beschreibung"]]
     styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='NewNormal',
+                              fontName=_baseFontName,
+                              fontSize=8,
+                              leading=12)
+                   )
+
+    styles.add(ParagraphStyle(name='NewNormalB',
+                              fontName=_baseFontNameB,
+                              fontSize=8,
+                              leading=12)
+                   )
+
+    styles.add(ParagraphStyle(name='NewNormalI',
+                              fontName=_baseFontNameI,
+                              fontSize=8,
+                              leading=12)
+                   )
+
     count =  len(data.items())- 1 # reduce by "index" entry     
     for title in data['Index']:
         for index in data['Index'][title]:
             s_description = data[index]['Description']
             if type(s_description) == str:
                 s_description = f"{get_first_words(s_description, 15)} ..."
-                description = Paragraph(s_description, styles["Normal"])
+                description = Paragraph(s_description, styles["NewNormal"])
             else:
                 description = "N/A"
 
@@ -64,8 +84,13 @@ def xlsx_proceed(database, path2images, columns=4):
                 if (poster.find("file:") != -1):
                     path = path2images + "/" + poster.split("/")[-1]
                     image = Image(convert_image2thumbnail(path, 50, 75))
+            
+            short_info = [Paragraph(data[index]["Title"], styles["NewNormalB"]), 
+                          Paragraph(get_first_words(str(data[index]["Genres"]), 10), styles["NewNormalI"]),
+                          Paragraph(get_first_words(get_actor_string(str(data[index]["Actors"])), 10), styles["NewNormal"])]
+            
 
-            row = [data[index]["Title"], data[index]["box"], image, description]
+            row = [short_info, data[index]["box"], image, description]
             table_data.append(row)
 
 
@@ -76,8 +101,8 @@ def xlsx_proceed(database, path2images, columns=4):
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'), 
         ('ALIGN', (0, 1), (0, -1), 'LEFT'), 
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), 
-        ('FONTSIZE', (0, 0), (-1, 0), 12), 
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12), 
+        ('FONTSIZE', (0, 0), (-1, -1), 8), 
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8), 
         ('BACKGROUND', (0, 1), (-1, -1), colors.white), 
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'TOP') 
@@ -108,6 +133,18 @@ def get_first_words(text, number=20):
     words = text.split() # Teilt den String in Wörter 
     first_words = words[:number] # Nimmt die ersten 20 Wörter 
     return ' '.join(first_words) # Fügt die Wörter wieder zu einem String zusammen 
+
+def get_actor_string(input_string):
+    # Dieses Regex-Muster erfasst "Schauspieler als Rolle" Paare
+    pattern = r'(\w+ als \w+)'
+    
+    # Alle Matches aus dem String holen
+    matches = re.findall(pattern, input_string)
+    
+    # Die Matches durch Kommata getrennt zusammenfügen
+    formatted_string = ', '.join(matches)
+    
+    return formatted_string
 
 def parse_arg() ->argparse.Namespace:
     parser = argparse.ArgumentParser(description='Create labels for each bos',
